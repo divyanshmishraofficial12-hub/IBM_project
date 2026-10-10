@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: phishguard-backend
+    runtime: python
+    plan: free
+    region: oregon
+    # ML model .pkl files are committed — no need to retrain on every deploy
+    buildCommand: pip install -r requirements.txt
+    # Single worker: prevents SQLite file-locking & keeps rate-limiter state consistent.
+    # To scale: add Render Postgres + Redis and increase --workers.
+    startCommand: gunicorn --chdir backend "server:app" --workers 1 --timeout 120 --bind 0.0.0.0:$PORT --log-file -
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      # After first deploy: set this to your Vercel URL for tighter security
+      # e.g. https://phishguard.vercel.app
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: FLASK_ENV
+        value: "production"
+      - key: RATE_LIMIT_SCAN
+        value: "30 per minute"
+      - key: RATE_LIMIT_AUTH
+        value: "20 per minute"
+      # Uncomment to use a Render Postgres DB for persistent storage:
+      # - key: DATABASE_URL
+      #   fromDatabase:
+      #     name: phishguard-db
+      #     property: connectionString
+      # Optional threat intelligence keys:
+      # - key: GOOGLE_SAFE_BROWSING_API_KEY
+      #   value: ""
+      # - key: VIRUSTOTAL_API_KEY
+      #   value: ""
