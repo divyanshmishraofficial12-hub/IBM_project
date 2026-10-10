@@ -23,7 +23,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_bcrypt import Bcrypt
 
-from database import db, ScanHistory, init_db
+from .database import db, ScanHistory, init_db
 from auth import auth_bp, bcrypt, token_required, optional_token
 from scanner import load_model, scan_url, scan_email, scan_message, scan_upi_qr
 from utils import sanitize_input, validate_url, validate_email_text, safe_unshorten_url
