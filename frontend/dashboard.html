@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — PhishGuard</title>
+  <meta name="description" content="View your PhishGuard scan history, threat statistics, and detailed phishing risk reports." />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════ NAVBAR ═══════════════════════════════ -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="container">
+    <a class="nav-brand" href="index.html" aria-label="PhishGuard home">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <polyline points="9 12 11 14 15 10"/>
+      </svg>
+      PhishGuard
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Scanner</a></li>
+      <li><a href="dashboard.html" class="active">Dashboard</a></li>
+    </ul>
+    <div class="nav-actions flex items-center gap-sm">
+      <span id="nav-greeting" class="text-sm text-muted"></span>
+      <a href="index.html" class="btn btn-secondary btn-sm">+ New Scan</a>
+      <button id="logout-btn" class="btn btn-ghost btn-sm">Log Out</button>
+    </div>
+  </div>
+</nav>
+
+<main class="container" style="padding-top: var(--space-xl); padding-bottom: var(--space-2xl);">
+
+  <!-- Page header -->
+  <div class="flex justify-between items-center" style="margin-bottom: var(--space-xl); flex-wrap:wrap; gap:var(--space-md);">
+    <div>
+      <h1 class="text-3xl" style="margin-bottom:4px;">
+        Security <span class="text-gradient">Dashboard</span>
+      </h1>
+      <p class="text-muted">Your scan history and threat intelligence overview.</p>
+    </div>
+    <a href="index.html" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Scan New Target
+    </a>
+  </div>
+
+  <!-- ═══════════════════════════ STAT CARDS ════════════════════════════ -->
+  <div class="grid-4 stagger" style="margin-bottom: var(--space-xl);" role="region" aria-label="Statistics">
+    <div class="stat-card">
+      <div class="stat-card-value" id="stat-total">—</div>
+      <div class="stat-card-label">Total Scans</div>
+    </div>
+    <div class="stat-card" style="--clr-accent: var(--clr-safe);">
+      <div class="stat-card-value" id="stat-safe" style="color: var(--clr-safe);">—</div>
+      <div class="stat-card-label">✅ Safe</div>
+    </div>
+    <div class="stat-card" style="--clr-accent: var(--clr-suspicious);">
+      <div class="stat-card-value" id="stat-suspicious" style="color: var(--clr-suspicious);">—</div>
+      <div class="stat-card-label">⚠️ Suspicious</div>
+    </div>
+    <div class="stat-card" style="--clr-accent: var(--clr-phishing);">
+      <div class="stat-card-value" id="stat-phishing" style="color: var(--clr-phishing);">—</div>
+      <div class="stat-card-label">🚨 Phishing</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ THREAT DISTRIBUTION ═══════════════════ -->
+  <div class="grid-2" style="margin-bottom: var(--space-xl);">
+    <!-- Distribution bar -->
+    <div class="card card-sm" role="region" aria-label="Threat distribution">
+      <h2 class="text-lg" style="margin-bottom: var(--space-md);">Threat Distribution</h2>
+      <div id="dist-bars" class="risk-meter" aria-live="polite">
+        <div class="flex justify-between text-sm">
+          <span>Safe</span><span id="dist-safe-pct">—</span>
+        </div>
+        <div class="risk-bar-track">
+          <div id="dist-safe-bar" class="risk-bar-fill safe" style="width:0%"></div>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span>Suspicious</span><span id="dist-sus-pct">—</span>
+        </div>
+        <div class="risk-bar-track">
+          <div id="dist-sus-bar" class="risk-bar-fill suspicious" style="width:0%"></div>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span>Phishing</span><span id="dist-phi-pct">—</span>
+        </div>
+        <div class="risk-bar-track">
+          <div id="dist-phi-bar" class="risk-bar-fill phishing" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick tips -->
+    <div class="card card-sm" role="complementary" aria-label="Security tips">
+      <h2 class="text-lg" style="margin-bottom: var(--space-md);">Security Tips</h2>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:var(--space-sm);">
+        <li class="text-sm">🔒 <strong>Always check HTTPS</strong> — padlock ≠ trusted site.</li>
+        <li class="text-sm">🌐 <strong>Hover before clicking</strong> — check the real URL in the status bar.</li>
+        <li class="text-sm">⚡ <strong>Urgent language is a red flag</strong> — legitimate orgs rarely demand immediate action.</li>
+        <li class="text-sm">📧 <strong>Check sender domain</strong> — paypa1.com ≠ paypal.com.</li>
+        <li class="text-sm">🛡️ <strong>Use a password manager</strong> — it won't autofill on fake domains.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ SCAN HISTORY TABLE ═════════════════════ -->
+  <div class="card" role="region" aria-label="Scan history">
+    <div class="flex justify-between items-center" style="margin-bottom: var(--space-lg); flex-wrap:wrap; gap:var(--space-md);">
+      <h2 class="text-xl">Scan History</h2>
+      <div class="flex gap-sm">
+        <button id="refresh-btn" class="btn btn-secondary btn-sm" aria-label="Refresh history">
+          🔄 Refresh
+        </button>
+        <button id="clear-all-btn" class="btn btn-ghost btn-sm" style="color: var(--clr-phishing);">
+          🗑 Clear All
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter / Search -->
+    <div class="flex gap-sm" style="margin-bottom: var(--space-md); flex-wrap:wrap;">
+      <input type="search" id="history-search" class="form-input" style="max-width:280px;"
+             placeholder="Search targets…" aria-label="Search scan history" />
+      <select id="verdict-filter" class="form-input" style="max-width:160px;" aria-label="Filter by verdict">
+        <option value="">All verdicts</option>
+        <option value="safe">✅ Safe</option>
+        <option value="suspicious">⚠️ Suspicious</option>
+        <option value="phishing">🚨 Phishing</option>
+      </select>
+      <select id="type-filter" class="form-input" style="max-width:140px;" aria-label="Filter by scan type">
+        <option value="">All types</option>
+        <option value="url">🔗 URL</option>
+        <option value="email">📧 Email</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div style="overflow-x:auto;">
+      <table class="history-table" aria-label="Scan history table">
+        <thead>
+          <tr>
+            <th scope="col">Type</th>
+            <th scope="col">Target</th>
+            <th scope="col">Risk</th>
+            <th scope="col">Verdict</th>
+            <th scope="col">GSB</th>
+            <th scope="col">VT</th>
+            <th scope="col">Date</th>
+            <th scope="col" aria-label="Actions"></th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody">
+          <tr id="history-loading-row">
+            <td colspan="8" style="text-align:center; padding: var(--space-xl); color: var(--clr-text-muted);">
+              <div class="radar-ring" style="width:40px; height:40px; margin-inline:auto; margin-bottom:var(--space-md);"><div class="radar-dot" style="width:8px; height:8px;"></div></div>
+              Loading scan history…
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-between items-center" style="margin-top: var(--space-lg); flex-wrap:wrap; gap:var(--space-md);">
+      <span id="pagination-info" class="text-sm text-muted"></span>
+      <div class="flex gap-sm">
+        <button id="prev-page" class="btn btn-secondary btn-sm" disabled>← Prev</button>
+        <button id="next-page" class="btn btn-secondary btn-sm" disabled>Next →</button>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" style="display:none; text-align:center; padding: var(--space-2xl);">
+      <div style="font-size:3rem; margin-bottom:var(--space-md);">🛡️</div>
+      <h3 class="text-xl" style="margin-bottom:var(--space-sm);">No scans yet</h3>
+      <p class="text-muted text-sm" style="margin-bottom:var(--space-lg);">Your scan history will appear here after you run your first check.</p>
+      <a href="index.html" class="btn btn-primary">Run Your First Scan</a>
+    </div>
+  </div>
+</main>
+
+<div id="toast-container" aria-live="polite" role="region" aria-label="Notifications"></div>
+
+<script src="assets/js/toast.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+
+  // ── Auth guard ────────────────────────────────────────────────────────
+  if (!Api.getToken()) {
+    window.location.href = 'auth.html';
+    return;
+  }
+
+  const userStr = localStorage.getItem('pd_user');
+  const user    = userStr ? JSON.parse(userStr) : { username: '…' };
+  const greet   = document.getElementById('nav-greeting');
+  if (greet) greet.textContent = `Hi, ${user.username}`;
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    Api.logout();
+    Toast.show('Logged out.', 'info');
+    setTimeout(() => window.location.href = 'auth.html', 700);
+  });
+
+  // ── State ─────────────────────────────────────────────────────────────
+  let currentPage = 1;
+  let totalPages  = 1;
+  let allRows     = [];
+
+  // ── Load stats ────────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const { stats, total } = await Api.getHistoryStats();
+      document.getElementById('stat-total').textContent      = total;
+      document.getElementById('stat-safe').textContent       = stats.safe       ?? 0;
+      document.getElementById('stat-suspicious').textContent = stats.suspicious ?? 0;
+      document.getElementById('stat-phishing').textContent   = stats.phishing   ?? 0;
+
+      if (total > 0) {
+        const pct = v => `${Math.round(((v ?? 0) / total) * 100)}%`;
+        ['safe','suspicious','phishing'].forEach(v => {
+          const pctVal = pct(stats[v] ?? 0);
+          document.getElementById(`dist-${v === 'safe' ? 'safe' : v === 'suspicious' ? 'sus' : 'phi'}-pct`).textContent = pctVal;
+          requestAnimationFrame(() => {
+            document.getElementById(`dist-${v === 'safe' ? 'safe' : v === 'suspicious' ? 'sus' : 'phi'}-bar`).style.width = pctVal;
+          });
+        });
+      }
+    } catch (err) {
+      Toast.show('Could not load stats: ' + err.message, 'error');
+    }
+  }
+
+  // ── Load history ──────────────────────────────────────────────────────
+  async function loadHistory(page = 1) {
+    showLoadingRow(true);
+    try {
+      const data = await Api.getHistory(page, 15);
+      allRows     = data.items;
+      currentPage = data.page;
+      totalPages  = data.total_pages;
+      renderRows(allRows);
+      updatePagination(data);
+    } catch (err) {
+      Toast.show('Could not load history: ' + err.message, 'error');
+      showLoadingRow(false);
+    }
+  }
+
+  function showLoadingRow(on) {
+    document.getElementById('history-loading-row').style.display = on ? '' : 'none';
+  }
+
+  function renderRows(items) {
+    const tbody = document.getElementById('history-tbody');
+    // Remove all rows except loading row
+    Array.from(tbody.querySelectorAll('tr:not(#history-loading-row)')).forEach(r => r.remove());
+    showLoadingRow(false);
+
+    const empty = document.getElementById('empty-state');
+
+    if (!items.length) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    items.forEach(item => {
+      const tr = document.createElement('tr');
+      const icon = item.scan_type === 'url' ? '🔗' : '📧';
+      const badge = `<span class="verdict-badge ${item.verdict}">${{safe:'✅ Safe',suspicious:'⚠️ Suspicious',phishing:'🚨 Phishing'}[item.verdict]}</span>`;
+      const pct   = Math.round(item.risk_score * 100);
+
+      tr.innerHTML = `
+        <td>${icon} <span class="text-xs text-muted">${item.scan_type.toUpperCase()}</span></td>
+        <td class="target-cell" title="${escHtml(item.target)}">${escHtml(item.target)}</td>
+        <td>
+          <span style="font-family:var(--font-mono); font-weight:700; color:${scoreColor(pct)};">${pct}%</span>
+          <div class="risk-bar-track" style="height:4px; margin-top:4px; width:80px;">
+            <div class="risk-bar-fill ${item.verdict}" style="width:${pct}%"></div>
+          </div>
+        </td>
+        <td>${badge}</td>
+        <td>${item.gsb_flagged ? '<span style="color:var(--clr-phishing)">🚨</span>' : '<span style="color:var(--clr-safe)">✅</span>'}</td>
+        <td>${item.vt_positives > 0 ? `<span style="color:var(--clr-phishing)">🚨 ${item.vt_positives}</span>` : '<span style="color:var(--clr-safe)">✅ 0</span>'}</td>
+        <td class="text-xs text-muted">${new Date(item.timestamp).toLocaleDateString()}<br>${new Date(item.timestamp).toLocaleTimeString()}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm delete-btn" data-id="${item.id}" aria-label="Delete scan ${item.id}" style="color:var(--clr-text-muted); font-size:1rem;">🗑</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Delete listeners
+    tbody.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.id);
+        if (!confirm('Delete this scan record?')) return;
+        try {
+          await Api.deleteHistory(id);
+          Toast.show('Record deleted.', 'success');
+          await loadHistory(currentPage);
+          await loadStats();
+        } catch (err) {
+          Toast.show('Delete failed: ' + err.message, 'error');
+        }
+      });
+    });
+  }
+
+  function updatePagination({ total, page, per_page, total_pages }) {
+    const start = (page - 1) * per_page + 1;
+    const end   = Math.min(page * per_page, total);
+    document.getElementById('pagination-info').textContent =
+      total ? `Showing ${start}–${end} of ${total} scans` : '';
+    document.getElementById('prev-page').disabled = page <= 1;
+    document.getElementById('next-page').disabled = page >= total_pages;
+  }
+
+  // ── Filtering (client-side on current page) ───────────────────────────
+  function applyFilters() {
+    const search  = document.getElementById('history-search').value.toLowerCase();
+    const verdict = document.getElementById('verdict-filter').value;
+    const type    = document.getElementById('type-filter').value;
+
+    const filtered = allRows.filter(row => {
+      const matchSearch  = !search  || row.target.toLowerCase().includes(search);
+      const matchVerdict = !verdict || row.verdict   === verdict;
+      const matchType    = !type    || row.scan_type === type;
+      return matchSearch && matchVerdict && matchType;
+    });
+    renderRows(filtered);
+  }
+
+  ['history-search','verdict-filter','type-filter'].forEach(id => {
+    document.getElementById(id).addEventListener('input', applyFilters);
+  });
+
+  // ── Pagination buttons ─────────────────────────────────────────────────
+  document.getElementById('prev-page').addEventListener('click', () => loadHistory(currentPage - 1));
+  document.getElementById('next-page').addEventListener('click', () => loadHistory(currentPage + 1));
+  document.getElementById('refresh-btn').addEventListener('click', async () => {
+    await loadHistory(currentPage);
+    await loadStats();
+    Toast.show('History refreshed.', 'info');
+  });
+
+  // ── Clear all ─────────────────────────────────────────────────────────
+  document.getElementById('clear-all-btn').addEventListener('click', async () => {
+    if (!confirm('Delete ALL scan history? This cannot be undone.')) return;
+    try {
+      const result = await Api.deleteAllHistory();
+      Toast.show(`All history cleared (${result.deleted} records).`, 'success');
+      await loadHistory(1);
+      await loadStats();
+    } catch (err) {
+      Toast.show('Error clearing history: ' + err.message, 'error');
+    }
+  });
+
+  // ── Helpers ────────────────────────────────────────────────────────────
+  function scoreColor(pct) {
+    if (pct < 35) return 'var(--clr-safe)';
+    if (pct < 65) return 'var(--clr-suspicious)';
+    return 'var(--clr-phishing)';
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────
+  await Promise.all([loadStats(), loadHistory(1)]);
+});
+</script>
+</body>
+</html>

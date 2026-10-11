@@ -1,0 +1,41 @@
+# Python byte code and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Environment secrets
+.env
+.env.local
+.env.*.local
+
+# Database & runtime instances
+*.db
+*.sqlite3
+backend/instance/
+instance/
+
+# Testing & linting
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*~
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Large pre-trained binaries (optional, but keep .pkl if deploying without building)
+# Note: url_model.pkl and email_model.pkl are trained lightweight models needed for deployment
