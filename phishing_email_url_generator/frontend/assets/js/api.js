@@ -92,19 +92,51 @@ const Api = (() => {
   }
 
   async function scanUrl(url, signal) {
-    return _request('POST', '/api/scan/url', { url }, signal);
+    try {
+      return await _request('POST', '/api/scan/url', { url }, signal);
+    } catch (err) {
+      if (typeof window !== 'undefined' && window.ClientEngine) {
+        console.warn('Backend unavailable, using client-side forensics engine:', err);
+        return window.ClientEngine.scanUrl(url);
+      }
+      throw err;
+    }
   }
 
   async function scanEmail(email_text, signal) {
-    return _request('POST', '/api/scan/email', { email_text }, signal);
+    try {
+      return await _request('POST', '/api/scan/email', { email_text }, signal);
+    } catch (err) {
+      if (typeof window !== 'undefined' && window.ClientEngine) {
+        console.warn('Backend unavailable, using client-side forensics engine:', err);
+        return window.ClientEngine.scanText(email_text);
+      }
+      throw err;
+    }
   }
 
   async function scanMessage(message_text, signal) {
-    return _request('POST', '/api/scan/message', { message_text }, signal);
+    try {
+      return await _request('POST', '/api/scan/message', { message_text }, signal);
+    } catch (err) {
+      if (typeof window !== 'undefined' && window.ClientEngine) {
+        console.warn('Backend unavailable, using client-side forensics engine:', err);
+        return window.ClientEngine.scanText(message_text);
+      }
+      throw err;
+    }
   }
 
   async function scanQr(payload, signal) {
-    return _request('POST', '/api/scan/qr', { payload }, signal);
+    try {
+      return await _request('POST', '/api/scan/qr', { payload }, signal);
+    } catch (err) {
+      if (typeof window !== 'undefined' && window.ClientEngine) {
+        console.warn('Backend unavailable, using client-side forensics engine:', err);
+        return window.ClientEngine.scanQr(payload);
+      }
+      throw err;
+    }
   }
 
   async function unshortenUrl(url, signal) {
